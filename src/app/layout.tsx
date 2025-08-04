@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ServiceWorkerDebug from "../components/ServiceWorkerDebug";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -93,19 +94,92 @@ export default function RootLayout({
         <meta name="application-name" content="HerFlowState" />
         <meta name="msapplication-TileColor" content="#ec4899" />
         <meta name="msapplication-config" content="/icons/browserconfig.xml" />
-
+        
         {/* Favicon and app icons */}
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#ec4899" />
-
+        
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <ServiceWorkerDebug />
         {children}
+        
+        {/* Service Worker Registration Script */}
+        <script 
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Service Worker Registration with Cache Busting
+              const SW_VERSION = '1.0.1';
+              
+              if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+                window.addEventListener('load', async () => {
+                  try {
+                    console.log('🔄 Starting Service Worker registration...');
+                    
+                    // Unregister any existing service workers first
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                      console.log('🗑️ Unregistering old service worker...');
+                      await registration.unregister();
+                    }
+                    
+                    // Small delay to ensure cleanup
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // Register new versioned service worker
+                    const registration = await navigator.serviceWorker.register(
+                      '/sw-v' + SW_VERSION + '.js?v=' + Date.now(),
+                      { 
+                        scope: '/',
+                        updateViaCache: 'none'
+                      }
+                    );
+                    
+                    console.log('✅ Service Worker v' + SW_VERSION + ' registered successfully');
+                    console.log('📍 Scope:', registration.scope);
+                    
+                    // Handle updates
+                    registration.addEventListener('updatefound', () => {
+                      const newWorker = registration.installing;
+                      console.log('🔄 New service worker version found, updating...');
+                      
+                      if (newWorker) {
+                        newWorker.addEventListener('statechange', () => {
+                          console.log('📱 SW State:', newWorker.state);
+                          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('✨ New service worker installed, reloading page...');
+                            window.location.reload();
+                          }
+                        });
+                      }
+                    });
+                    
+                    // Listen for controller changes
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                      console.log('🔄 Service worker controller changed');
+                      window.location.reload();
+                    });
+                    
+                    // Force update check after 5 seconds
+                    setTimeout(() => {
+                      registration.update();
+                    }, 5000);
+                    
+                  } catch (error) {
+                    console.error('❌ Service Worker registration failed:', error);
+                  }
+                });
+              } else {
+                console.warn('⚠️ Service Workers not supported in this browser');
+              }
+            `
+          }} 
+        />
       </body>
     </html>
   );

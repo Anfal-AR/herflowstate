@@ -2,7 +2,7 @@
   "name": "HerFlowState - Self-Care & Productivity Toolkit",
   "short_name": "HerFlowState",
   "description": "A comprehensive self-care & productivity toolkit for modern women who build, create, and lead.",
-  "start_url": "/",
+  "start_url": "/?utm_source=pwa",
   "display": "standalone",
   "theme_color": "#ec4899",
   "background_color": "#fdf2f8",
@@ -85,11 +85,6 @@
       "src": "/icons/favicon-16x16.png",
       "sizes": "16x16",
       "type": "image/png"
-    },
-    {
-      "src": "/icons/safari-pinned-tab.svg",
-      "sizes": "64x64",
-      "type": "image/svg+xml" // Fixed type to "image/svg+xml"
     }
   ],
   "screenshots": [

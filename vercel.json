@@ -51,8 +51,13 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw-v.*\\.js|icons|screenshots).*)",
+      "destination": "/"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/health/route.js": {
+      "maxDuration": 10
+    }
+  }
 }

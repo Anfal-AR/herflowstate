@@ -14,15 +14,11 @@
       ]
     },
     {
-      "source": "/sw-v*.js",
+      "source": "/(.*\\.js)",
       "headers": [
         {
           "key": "Content-Type",
           "value": "application/javascript"
-        },
-        {
-          "key": "Service-Worker-Allowed",
-          "value": "/"
         },
         {
           "key": "Cache-Control",
@@ -49,15 +45,26 @@
       ]
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/((?!api|_next/static|_next/image|favicon.ico|manifest.json|.*\\.js|icons|screenshots).*)",
-      "destination": "/"
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/(.*\\.js)",
+      "dest": "/$1"
+    },
+    {
+      "src": "/icons/(.*)",
+      "dest": "/icons/$1"
+    },
+    {
+      "src": "/screenshots/(.*)",
+      "dest": "/screenshots/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
-  ],
-  "functions": {
-    "app/api/health/route.js": {
-      "maxDuration": 10
-    }
-  }
+  ]
 }
